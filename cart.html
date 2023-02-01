@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cart Page</title>
+    <style>
+      #cart-container{
+        display: grid;
+        margin: auto;
+        width: 80%;
+        grid-template-columns: repeat(4,1fr);
+        gap: 15px;
+      }
+      .card{
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        padding: 10px;
+      }
+      .card img{
+        width: 100%;
+      }
+      .nav{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        margin-bottom: 5px;
+      }
+      .nav > a{
+        font-size: 20px;
+        text-decoration: none;
+      }
+      .nav > a:nth-child(3){
+        color: blue;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav">
+      <h1>Masai E-Commerce</h1>
+      <a href="./index.html">Home</a>
+      <a href="./cart.html">Cart🛒</a>
+    </div>
+    <h1 id="total">Your Total cart Price is:- <span id="cart-total">0</span></h1>
+    <div id="cart-container">
+      <!-- Here Append All the cart Products  -->
+    </div>
+  </body>
+  <script>
+    // Write all necessery JS here 
+    let cartContainer = document.getElementById("cart-container");
+    let cartTotal = document.getElementById("cart-total");
+
+    let quantityArray = JSON.parse(localStorage.getItem("quanties")) || [];
+    let priceArray = JSON.parse(localStorage.getItem("prices")) || [];
+
+    let cartData = JSON.parse(localStorage.getItem("cart")) || [];
+    displayProducts(cartData);
+
+    function displayProducts(data){
+      let total = 0
+      cartContainer.innerHTML = ""
+
+      data.forEach((element, index) => {
+        let card = document.createElement('div');
+        card.className = "card"
+
+        let img = document.createElement("img")
+        img.setAttribute("src", element.img);
+
+        let brand = document.createElement("h2");
+        brand.innerText = element.brand;
+
+        let price = document.createElement("h3")
+        price.innerText = "₹"+element.price;
+        priceArray[index] = Number(element.price);
+
+        let detail = document.createElement("p");
+        detail.innerText = element.details;
+
+        let category = document.createElement("p")
+        category.innerText = element.category;
+        
+        let incBtn = document.createElement("button")
+        incBtn.innerText = "+";
+
+        let quantity = document.createElement("span")   
+        if(quantityArray.length ==index){
+          quantityArray[index] = 1
+          quantity.innerText = 1;
+        }else{
+          quantity.innerText = quantityArray[index];
+        }
+
+        let decBtn = document.createElement("button")
+        decBtn.innerText = "-";
+
+        let removeBtn = document.createElement("button");
+        removeBtn.innerText = "Remove";
+
+        removeBtn.addEventListener("click", ()=> {
+          cartData.splice(index,1);
+          quantityArray.splice(index,1);
+          priceArray.splice(index,1)
+
+          localStorage.setItem("cart",JSON.stringify(data));
+          cartData = JSON.parse(localStorage.getItem("cart")) || [];
+
+          localStorage.setItem("prices", JSON.stringify(priceArray));
+          priceArray = JSON.parse(localStorage.getItem("prices")) || [];
+          
+          localStorage.setItem("quanties", JSON.stringify(quantityArray));
+          quantityArray = JSON.parse(localStorage.getItem("quanties")) || [];
+          
+          displayProducts(cartData);
+          displayTotal();
+        })
+        incBtn.addEventListener("click", ()=> {
+          quantity.innerText = Number(quantity.innerText) + 1;
+          quantityArray[index]++;
+          localStorage.setItem("quanties", JSON.stringify(quantityArray));
+          quantityArray = JSON.parse(localStorage.getItem("quanties")) || [];
+          displayTotal();
+        })
+        decBtn.addEventListener("click", ()=> {
+          quantity.innerText = Number(quantity.innerText) - 1;
+          quantityArray[index]--;
+          if(quantityArray[index]==0){
+            quantityArray[index] = 1
+            quantity.innerText = 1
+          }
+          localStorage.setItem("quanties", JSON.stringify(quantityArray));
+          quantityArray = JSON.parse(localStorage.getItem("quanties")) || [];
+          displayTotal();
+        })
+
+        card.append(img,brand,price,detail,category,incBtn,quantity,decBtn,removeBtn)
+        cartContainer.append(card);
+        total += Number(quantity.innerText)*Number(element.price)
+      });
+      displayTotal();
+    }
+    function displayTotal(){
+      let total = 0
+      for(let i=0; i<quantityArray.length; i++){
+        total += (quantityArray[i]*priceArray[i])
+      }
+      cartTotal.innerText = total;
+    }
+
+  </script>
+</html>

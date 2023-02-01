@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Page</title>
+    <style>
+      /* Write all necessery css here  */
+      *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      #product-container{
+        display: grid;
+        margin: auto;
+        width: 80%;
+        grid-template-columns: repeat(4,1fr);
+        gap: 15px;
+      }
+      .card{
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        padding: 10px;
+      }
+      .card img{
+        width: 100%;
+      }
+      .card button{
+        padding: 10px;
+        font-size: 18px;
+        color: white;
+        background-color: rgb(150, 77, 219);
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-left: 20%;
+      }
+      .nav{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        padding: 10px;
+        margin-bottom: 5px;
+      }
+      .nav > a{
+        font-size: 20px;
+        text-decoration: none;
+      }
+      .nav > a:nth-child(3){
+        color: blue;
+        font-weight: bold;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="nav">
+      <h1>Masai E-Commerce</h1>
+      <a href="./index.html">Home</a>
+      <a href="./cart.html">Cart🛒</a>
+    </div>
+    <!-- Use this Select Tag for Filtering the Products  -->
+    <select id="filter">
+      <option value="">Filter By Category</option>
+      <option value="Laptop">Laptop</option>
+      <option value="Mobile">Mobile</option>
+      <option value="Speakers">Speakers</option>
+    </select>
+    <div id="product-container">
+      <!-- Here Append All the Products  -->
+    </div>
+  </body>
+  <script>
+    // Write all necessery JS here 
+    let productContainer = document.getElementById("product-container");
+    let filterEl = document.getElementById("filter");
+    let fetchedData = []
+    let cartData = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const url = `https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-tech-products`;
+    fetch(url).then(res => res.json())
+    .then((data) => {
+      fetchedData = data.data;
+      displayProducts(fetchedData);
+    });
+
+    filterEl.addEventListener("change", () => {
+      let filterValue = filterEl.value;
+      let filteredData = fetchedData.filter((element) => element.category==filterValue);
+      displayProducts(filteredData);
+    })
+    function displayProducts(data){
+      console.log(data);
+      productContainer.innerHTML = ""
+      data.forEach(element => {
+        let card = document.createElement('div');
+        card.className = "card"
+
+        let img = document.createElement("img")
+        img.setAttribute("src", element.img)
+        let brand = document.createElement("h2");
+        brand.innerText = element.brand;
+        let price = document.createElement("h3")
+        price.innerText = "₹"+element.price;
+        let detail = document.createElement("p");
+        detail.innerText = element.details;
+        let category = document.createElement("p")
+        category.innerText = element.category;
+        let btn = document.createElement("button");
+        btn.innerText = "Add To Cart";
+        btn.addEventListener("click", ()=> {
+          let flag = true;
+          cartData.forEach(el => {
+            if(el.id==element.id){
+              flag = false;
+              return
+            }
+          })
+          if(flag){
+            alert("Product Added To Cart")
+            cartData.push(element);
+            localStorage.setItem("cart", JSON.stringify(cartData));
+          }else{
+            alert("Product Already in Cart")
+          }
+        })
+
+        card.append(img,brand,price,detail,category,btn)
+        productContainer.append(card);
+      });
+    }
+  </script>
+</html>
